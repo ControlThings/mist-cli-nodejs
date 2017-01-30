@@ -1,0 +1,22 @@
+{
+  "name": "mist-cli",
+  "version": "0.0.1",
+  "author": "André Kaustell <andre.kaustell@controlthings.fi>",
+  "description": "Mist Cli tool based on mist-api",
+  "main": "src/index.js",
+  "dependencies": {
+    "bson-buffer": "1.0.2",
+    "mist-api": "0.0.12"
+  },
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://mist.controlthings.fi/git/mist-cli#master"
+  },
+  "bin": {
+    "mist-cli": "./bin/mist-cli"
+  },
+  "scripts": {
+    "test": "istanbul cover --hook-run-in-context _mocha -- -R spec"
+  }
+}

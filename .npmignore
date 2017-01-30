@@ -1,0 +1,8 @@
+/nbproject
+/coverage
+/node_modules
+/npm-debug.log
+/*.tgz
+/mappings.bin
+
+/.npmignore
