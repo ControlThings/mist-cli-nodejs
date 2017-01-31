@@ -128,7 +128,7 @@ help['mist.manage.user.ensure'] = { short: 'Ensure peer knows user', args: 'Pee
 MistCli.prototype.repl = function() {
     var self = this;
     console.log("\x1b[37mWelcome to Mist CLI v" + pkg.version +"\x1b[39m");
-    console.log("\x1b[33mNot everything works as expected!\x1b[39m");
+    console.log("\x1b[33mNot everything works as expected! You have been warned.\x1b[39m");
     console.log("Try 'help()' to get started.");
     
     mist.request('methods', [], function(err, methods) {

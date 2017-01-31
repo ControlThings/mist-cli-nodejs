@@ -1,9 +1,9 @@
 {
   "name": "mist-cli",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "André Kaustell <andre.kaustell@controlthings.fi>",
   "description": "Mist Cli tool based on mist-api",
-  "main": "src/index.js",
+  "main": "src/mist-cli.js",
   "dependencies": {
     "bson-buffer": "1.0.2",
     "mist-api": "0.0.12"
@@ -11,7 +11,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+ssh://mist.controlthings.fi/git/mist-cli#master"
+    "url": "https://github.com/ControlThings/mist-cli-nodejs.git#master"
   },
   "bin": {
     "mist-cli": "./bin/mist-cli"
