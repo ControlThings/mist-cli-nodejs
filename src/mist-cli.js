@@ -100,87 +100,137 @@ MistCli.prototype.model = function(peer) {
     });
 };
 
+var help = {};
+
+help['methods'] = { short: 'List available rpc commands', args: '' };
+help['listPeers'] = { short: 'List available peers', args: '' };
+help['signals'] = { short: 'Subscribe to signals, like changes in peers list etc.', args: '' };
+help['ready'] = { short: 'Get ready state or if not ready, subscribe to ready', args: '' };
+help['getServiceId'] = { short: 'Get Wish App id', args: '' };
+
+help['mist.control.model'] = { short: 'Model of peer', args: 'Peer peer' };
+help['mist.control.read'] = { short: 'Read current value from peers endpoint', args: 'Peer peer, String endpoint' };
+help['mist.control.write'] = { short: 'Write value to peers endpoint', args: 'Peer peer, String endpoint, value' };
+help['mist.control.invoke'] = { short: 'Invoke peers endpoint', args: 'Peer peer, String endpoint, value' };
+help['mist.control.follow'] = { short: 'Follow changes in peer', args: 'Peer peer' };
+help['mist.control.requestMapping'] = { short: 'Request to map remote endpoints togehter', args: 'Peer dst, Peer src, String srcEndpoint, Object srcOpts, String dstEndpoint, Object dstOpts' };
+
+help['mist.manage.claim'] = { short: 'Claim ownership of peer', args: 'Peer peer' };
+help['mist.manage.peers'] = { short: 'List peers seen from peer', args: 'Peer peer' };
+help['mist.manage.acl.model'] = { short: 'Show access control model from peer', args: 'Peer peer' };
+help['mist.manage.acl.allow'] = { short: 'Allow role permission to endpoint in peer', args: 'Peer peer, role, endpoint, permission' };
+help['mist.manage.acl.removeAllow'] = { short: 'Remove role permission to endpoint in peer', args: 'Peer peer, role, endpoint, permission' };
+help['mist.manage.acl.addUserRoles'] = { short: 'Add user to role in peer', args: 'Peer peer, user, role' };
+help['mist.manage.acl.removeUserRoles'] = { short: 'Remove user from role in peer', args: 'Peer peer, user, role' };
+help['mist.manage.acl.userRoles'] = { short: 'Enumerate user roles in peer', args: 'Peer peer, user' };
+help['mist.manage.user.ensure'] = { short: 'Ensure peer knows user', args: 'Peer peer, Cert user' };
+
 MistCli.prototype.repl = function() {
+    var self = this;
     console.log("Welcome to Mist CLI v" + pkg.version);
+    console.log("Try 'help()' to get started.");
     
-    var methods = {
-        listPeers: { args: 'nada', doc: 'list some peerz' },
-        'mist.control.model': {},
-        'mist.control.read': {},
-        'mist.control.write': {},
-        'mist.control.invoke': {}
-    };
-
-    for (var i in methods) {
-        var path = i.split('.');
-        var node = Core;
-        while (path.length>1) {
-            if (!node[path[0]]) {
-                node[path[0]] = {};
-            }
-            node = node[path[0]];
-            path.shift();
-        }
-
-        node[path[0]] = (function(i) { 
-            return function() { 
-                var args = [];
-                var cb = arguments[arguments.length-1];
-
-                if ( typeof cb !== 'function') { 
-                    cb = printResult; 
-                    for (var j=0; j < arguments.length; j++) {
-                        args.push(arguments[j]);
-                    }
-                } else {
-                    for (var j=0; j < arguments.length-1; j++) {
-                        args.push(arguments[j]);
-                    }
+    mist.request('methods', [], function(err, methods) {
+        if (err) { console.log('Mist API responded with an error.'); process.exit(0); return; }
+        
+        var mroot = {};
+    
+        for (var i in methods) {
+            var path = i.split('.');
+            var node = mroot;
+            while (path.length>1) {
+                if (!node[path[0]]) {
+                    node[path[0]] = {};
                 }
-                mist.request(i, args, cb); 
+                node = node[path[0]];
+                path.shift();
+            }
+
+            node[path[0]] = (function(i) { 
+                return function() {
+                    var args = [];
+                    var cb = arguments[arguments.length-1];
+
+                    if ( typeof cb !== 'function') { 
+                        cb = printResult; 
+                        for (var j=0; j < arguments.length; j++) {
+                            args.push(arguments[j]);
+                        }
+                    } else {
+                        for (var j=0; j < arguments.length-1; j++) {
+                            args.push(arguments[j]);
+                        }
+                    }
+                    mist.request(i, args, cb); 
+                };
+            })(i);
+            //Init help hints
+            //Object.defineProperty(node[path[0]], "_help_", {value : '('+methods[i].args +') '+ methods[i].doc });
+            
+            var args = help[i] && help[i].args ? help[i].args : 'n/a';
+            var doc = help[i] && help[i].short ? help[i].short : 'n/a';
+            
+            Object.defineProperty(node[path[0]], "inspect", {
+                enumerable: false,
+                configurable: false,
+                writable: false,
+                value: (function(args, doc) { return function() { return '\x1b[33m('+args+')\x1b[37m '+doc+'\x1b[39m'; } })(args, doc)
+            });
+        };
+
+        var repl = require("repl").start({
+            prompt: "mist> ",
+            input: process.stdin,
+            output: process.stdout,
+            terminal: true,
+            ignoreUndefined: true,
+            writer : function (obj) {
+                return inspect(obj, maxInspectDepth, null, useColors);
+            }
+        });
+
+        repl.on("exit", function () {
+            mist.shutdown();
+            console.log("Bye!");
+            process.exit(0);
+        });
+
+        function printResult(err, data) {
+            if(err) {
+                console.log("Error:", data);
+            } else {
+                console.log(inspect(data, maxInspectDepth, null, useColors));
+            }
+            repl.context.result = data;
+            repl.context.error = err;
+        }
+
+        function syncctx() {
+            repl.resetContext();
+            for(var i in mroot) {
+                repl.context[i] = mroot[i];
+            }
+            repl.context['BSON'] = BSON;
+            repl.context['help'] = function() {
+                console.log('Help:');
+                console.log();
+                console.log('  list()        List available peers');
+                console.log();
+                console.log('Available commands from mist-api:');
+                console.log(inspect(mroot, { colors: true, depth: 10 }));
             };
-        })(i);
-        //Init help hints
-        Object.defineProperty(node[path[0]], "_help_", {value : '('+methods[i].args +') '+ methods[i].doc });
-    };
-
-    var repl = require("repl").start({
-        prompt: "mist> ",
-        input: process.stdin,
-        output: process.stdout,
-        terminal: true,
-        ignoreUndefined: true,
-        writer : function (obj) {
-            return inspect(obj, maxInspectDepth, null, useColors);
+            repl.context['list'] = (function() {
+                console.log('Known peers:');
+                for(var i in this.peers) {
+                    var peer = this.peers[i];
+                    console.log('  peers['+i+']:', this.modelCache[peer.hash].device, ' ('+ this.ids[peer.ruid.toString('hex')].alias +')');
+                }
+            }).bind(self);
         }
+
+        syncctx();
+        self.replCtx = repl;
     });
-
-    repl.on("exit", function () {
-        mist.shutdown();
-        console.log("Bye!");
-        process.exit(0);
-    });
-
-    function printResult(err, data) {
-        if(err) {
-            console.log("Error:", data);
-        } else {
-            console.log(inspect(data, maxInspectDepth, null, useColors));
-        }
-        repl.context.result = data;
-        repl.context.error = err;
-    }
-
-    function syncctx() {
-        repl.resetContext();
-        for(var i in Core) {
-            repl.context[i] = Core[i];
-        }
-        repl.context['BSON'] = BSON;
-    }
-
-    syncctx();
-    this.replCtx = repl;
 };
     
 module.exports = {
