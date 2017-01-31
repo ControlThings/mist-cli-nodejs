@@ -127,7 +127,8 @@ help['mist.manage.user.ensure'] = { short: 'Ensure peer knows user', args: 'Pee
 
 MistCli.prototype.repl = function() {
     var self = this;
-    console.log("Welcome to Mist CLI v" + pkg.version);
+    console.log("\x1b[37mWelcome to Mist CLI v" + pkg.version +"\x1b[39m");
+    console.log("\x1b[33mNot everything works as expected!\x1b[39m");
     console.log("Try 'help()' to get started.");
     
     mist.request('methods', [], function(err, methods) {
@@ -161,7 +162,7 @@ MistCli.prototype.repl = function() {
                             args.push(arguments[j]);
                         }
                     }
-                    mist.request(i, args, cb); 
+                    return mist.request(i, args, function() { console.log(); cb.apply(this, arguments); repl.displayPrompt(); }); 
                 };
             })(i);
             //Init help hints
@@ -184,7 +185,7 @@ MistCli.prototype.repl = function() {
             output: process.stdout,
             terminal: true,
             ignoreUndefined: true,
-            writer : function (obj) {
+            writer: function (obj) {
                 return inspect(obj, maxInspectDepth, null, useColors);
             }
         });
@@ -215,17 +216,21 @@ MistCli.prototype.repl = function() {
                 console.log('Help:');
                 console.log();
                 console.log('  list()        List available peers');
+                console.log('  cancel(id)    Cancel mist-api request by id');
                 console.log();
                 console.log('Available commands from mist-api:');
                 console.log(inspect(mroot, { colors: true, depth: 10 }));
             };
             repl.context['list'] = (function() {
-                console.log('Known peers:');
+                console.log('Known peers: (highlighted are online)');
                 for(var i in this.peers) {
                     var peer = this.peers[i];
-                    console.log('  peers['+i+']:', this.modelCache[peer.hash].device, ' ('+ this.ids[peer.ruid.toString('hex')].alias +')');
+                    console.log((peer.online ? '\x1b[37m' : '\x1b[39m')+'  peers['+i+']:', this.modelCache[peer.hash].device, '('+ this.ids[peer.ruid.toString('hex')].alias +')'+'\x1b[39m');
                 }
             }).bind(self);
+            repl.context['cancel'] = function(id) {
+                mist.requestCancel(id);
+            };
         }
 
         syncctx();
