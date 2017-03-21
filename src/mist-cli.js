@@ -81,6 +81,7 @@ MistCli.prototype.updatePeersCb = function(err, peers) {
         this.peers[i].hash = crypto.createHash('sha256').update(buf).digest('hex').substr(0, 16);
         
         if (!this.modelCache[this.peers[i].hash]) {
+            this.modelCache[this.peers[i].hash] = { device: 'n/a' };
             this.model(this.peers[i]);
         }
     }
@@ -103,6 +104,7 @@ MistCli.prototype.model = function(peer) {
 var help = {};
 
 help['methods'] = { short: 'List available rpc commands', args: '' };
+help['version'] = { short: 'Build version', args: '' };
 help['listPeers'] = { short: 'List available peers', args: '' };
 help['signals'] = { short: 'Subscribe to signals, like changes in peers list etc.', args: '' };
 help['ready'] = { short: 'Get ready state or if not ready, subscribe to ready', args: '' };
@@ -124,6 +126,26 @@ help['mist.manage.acl.addUserRoles'] = { short: 'Add user to role in peer', arg
 help['mist.manage.acl.removeUserRoles'] = { short: 'Remove user from role in peer', args: 'Peer peer, user, role' };
 help['mist.manage.acl.userRoles'] = { short: 'Enumerate user roles in peer', args: 'Peer peer, user' };
 help['mist.manage.user.ensure'] = { short: 'Ensure peer knows user', args: 'Peer peer, Cert user' };
+
+help['wish.identity.list'] = { short: 'List identities', args: '' };
+
+help['sandbox.list'] = { short: 'List sandboxes', args: 'Buffer sandboxId' };
+help['sandbox.remove'] = { short: 'Remove sandbox', args: 'Buffer sandboxId' };
+help['sandbox.listPeers'] = { short: 'List peers allowed in sandbox', args: 'Buffer sandboxId' };
+help['sandbox.addPeer'] = { short: 'Add peer to allowed list for sandbox', args: 'Buffer sandboxId, Peer peer' };
+help['sandbox.removePeer'] = { short: 'Remove peer from allowed list for sandbox', args: 'Buffer sandboxId, Peer peer' };
+
+help['sandboxed.login'] = { short: 'Login sandboxed app', args: 'Buffer sandboxId, String name' };
+help['sandboxed.logout'] = { short: 'Log out sandboxed app', args: 'Buffer sandboxId' };
+help['sandboxed.settings'] = { short: 'Request settings to be shown by sandbox manager', args: 'Buffer sandboxId' };
+help['sandboxed.listPeers'] = { short: 'List peers in sandbox', args: 'Buffer sandboxId' };
+help['sandboxed.signals'] = { short: 'Subscribe to sandboxed signals for app', args: 'Buffer sandboxId' };
+help['sandboxed.mist.control.model'] = { short: 'Model of peer', args: 'Buffer sandboxId, Peer peer' };
+help['sandboxed.mist.control.read'] = { short: 'Read current value from peers endpoint', args: 'Buffer sandboxId, Peer peer, String endpoint' };
+help['sandboxed.mist.control.write'] = { short: 'Write value to peers endpoint', args: 'Buffer sandboxId, Peer peer, String endpoint, value' };
+help['sandboxed.mist.control.invoke'] = { short: 'Invoke peers endpoint', args: 'Buffer sandboxId, Peer peer, String endpoint, value' };
+help['sandboxed.mist.control.follow'] = { short: 'Follow changes in peer', args: 'Buffer sandboxId, Peer peer' };
+help['sandboxed.wish.identity.list'] = { short: 'List identities', args: 'Buffer sandboxId' };
 
 MistCli.prototype.repl = function() {
     var self = this;
@@ -168,7 +190,7 @@ MistCli.prototype.repl = function() {
             //Init help hints
             //Object.defineProperty(node[path[0]], "_help_", {value : '('+methods[i].args +') '+ methods[i].doc });
             
-            var args = help[i] && help[i].args ? help[i].args : 'n/a';
+            var args = help[i] && help[i].args ? help[i].args : '';
             var doc = help[i] && help[i].short ? help[i].short : 'n/a';
             
             Object.defineProperty(node[path[0]], "inspect", {
