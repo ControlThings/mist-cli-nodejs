@@ -1,10 +1,10 @@
 # Mist Cli
 
-Dependent on the mist-api package, which currently is working with Linux x64 and nodejs v6.x only. To get it working you also need to run a Wish Core on the same host. The Wish Core linux-x64 executable can be downloaded https://mist.controlthings.fi/dist/wish-core-v0.6.6-stable3-linux-x64.
+Dependent on the mist-api package, which currently is working with Linux x64 and nodejs v6.x only. To get it working you also need to run a Wish Core on the same host.
 
 ## Prerequisites
 
-Download and run wish-core (https://mist.controlthings.fi/dist/wish-core-v0.6.6-stable3-linux-x64).
+Download and run wish-core (https://mist.controlthings.fi/developer).
 
 ```sh
 ./wish-core-v0.6.6-stable3-linux-x64
