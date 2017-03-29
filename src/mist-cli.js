@@ -27,13 +27,8 @@ function MistCli() {
     this.modelCache = {};
     
     this.repl();
-    
-    mist.wish('identity.list', [], function (err, data) {
-        self.ids = {};
-        for(var i in data) {
-            self.ids[data[i].uid.toString('hex')] = data[i];
-        }
-    });
+
+    this.updateIdentities();
     
     mist.request('signals', [], function(err, data) {
         var signal;
@@ -60,18 +55,48 @@ function MistCli() {
     this.updatePeers();
 }
 
+MistCli.prototype.updateIdentities = function() {
+    var self = this;
+    
+    mist.wish('identity.list', [], function (err, data) {
+        self.ids = {};
+        for(var i in data) {
+            self.ids[data[i].uid.toString('hex')] = data[i];
+        }
+        
+        self.updatePeersCb(null, self.peers);
+    });
+};
+
 MistCli.prototype.updatePeers = function() {
     mist.request('listPeers', [], this.updatePeersCb.bind(this));
 };
 
 MistCli.prototype.updatePeersCb = function(err, peers) {
+    var self = this;
     this.peers = peers;
+
+    var problem = false;
     
     if (this.ids) {
         for(var i in this.peers) {
-            this.peers[i].l = this.ids[this.peers[i].luid.toString('hex')].alias;
-            this.peers[i].r = this.ids[this.peers[i].ruid.toString('hex')].alias;
+            try {
+                this.peers[i].l = this.ids[this.peers[i].luid.toString('hex')].alias;
+                this.peers[i].r = this.ids[this.peers[i].ruid.toString('hex')].alias;
+            } catch (e) {
+                // failed to get alias for this peer
+                this.peers[i].l = 'n/a';
+                this.peers[i].r = 'n/a';
+
+                // mark as problem, will update the identity list
+                problem = true;
+            }
         }
+    }
+    
+    if (problem) {
+        // try to update identity list
+        self.updateIdentities();
     }
     
     for(var i in this.peers) {
@@ -242,13 +267,27 @@ MistCli.prototype.repl = function() {
                 console.log();
                 console.log('Available commands from mist-api:');
                 console.log(inspect(mroot, { colors: true, depth: 10 }));
+                console.log();
+                console.log('Example:');
+                console.log();
+                console.log('  list()');
+                console.log('  mist.control.model(peers[2])');
+                console.log("  mist.control.follow(peers[2])                    // set followId = request id returned");
+                console.log("  mist.control.write(peers[2], 'lamp', true)");
+                console.log("  cancel(followId)                                 // stops updates");
+                console.log('');
+                console.log("\x1b[32mHave fun, but remember that this is bleeding egde of the development and WILL BREAK from time to time.\x1b[39m");
             };
             repl.context['list'] = (function() {
-                console.log('Known peers: (highlighted are online)');
+                console.log('Known peers:');
+                var none = true;
                 for(var i in this.peers) {
+                    none = false;
                     var peer = this.peers[i];
-                    console.log((peer.online ? '\x1b[37m' : '\x1b[39m')+'  peers['+i+']:', this.modelCache[peer.hash].device, '('+ this.ids[peer.ruid.toString('hex')].alias +')'+'\x1b[39m');
+                    var alias = this.ids[peer.ruid.toString('hex')] ? this.ids[peer.ruid.toString('hex')].alias : 'n/a';
+                    console.log('\x1b[37m'+'  peers['+i+']:', this.modelCache[peer.hash].device, '('+ alias +') '+(peer.online ? '':'offline')+'\x1b[39m');
                 }
+                if (none) { console.log('  (no peers found)'); }
             }).bind(self);
             repl.context['cancel'] = function(id) {
                 mist.requestCancel(id);
