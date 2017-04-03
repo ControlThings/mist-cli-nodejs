@@ -1,13 +1,34 @@
 # Mist Cli
 
-Dependent on the mist-api package, which currently is working with Linux x64 and nodejs v6.x only. To get it working you also need to run a Wish Core on the same host.
+This is bleeding egde software and WILL BREAK from time to time, you have been warned.
+
+This package is dependent on the mist-api package, which currently is working with Linux x64, OSX x64 and Raspberry Pi, on nodejs v6.x only. To get it working you also need to run a Wish Core on the same host.
 
 ## Prerequisites
 
-Download and run wish-core (https://mist.controlthings.fi/developer).
+*If you ended up here by accident, you might not get this to work.*
+
+1) Download and install `node.js` v.6.x. (tested on v6.9.2)
+
+2) Download and run wish-core (https://mist.controlthings.fi/developer).
 
 ```sh
-./wish-core-v0.6.6-stable3-linux-x64
+wget https://mist.controlthings.fi/dist/wish-core-v0.6.8-x64-linux
+chmod +x ./wish-core-v0.6.8-x64-linux
+./wish-core-v0.6.8-x64-linux
+```
+
+3) Get command line tool `wish-cli`
+
+```sh
+npm install -g wish-cli
+wish-cli
+```
+
+4)  Create an identity with `wish-cli`
+
+```javascript
+identity.create('John Andersson')
 ```
 
 ## Install and run
