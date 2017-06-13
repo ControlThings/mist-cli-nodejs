@@ -1,8 +1,7 @@
 
-if(!process.env.CORE && !process.env.TCP) {
-    console.log("Connecting using default parameters, unsecure connection to localhost:9094.");
-    process.env.CORE = 'localhost:9094';
-    process.env.TCP = '1';
+if(!process.env.CORE) {
+    console.log("Connecting using default parameters, localhost:9094. Use env CORE=<port> for connecting to other port");
+    process.env.CORE = '9094';
 }
 
 var inspect = require("util").inspect;
@@ -13,13 +12,10 @@ var useColors = true;
 var maxInspectDepth = 10;
 var pkg = require("./../package.json");
 
-Core = {};
-
-
 var Mist = require('mist-api').Mist;
 var crypto = require('crypto');
 
-var mist = new Mist();
+var mist = new Mist({ name: 'MistCli', corePort: parseInt(process.env.CORE) });
 
 function MistCli() {
     var self = this;
@@ -31,6 +27,8 @@ function MistCli() {
     this.updateIdentities();
     
     mist.request('signals', [], function(err, data) {
+        if (err) { return console.log('signals failed.', data); }
+        
         var signal;
         var payload;
         
@@ -73,6 +71,8 @@ MistCli.prototype.updatePeers = function() {
 };
 
 MistCli.prototype.updatePeersCb = function(err, peers) {
+    if (err) { return console.log('listPeers returned error', peers); }
+    
     var self = this;
     this.peers = peers;
 
@@ -120,8 +120,7 @@ MistCli.prototype.model = function(peer) {
     
     mist.request('mist.control.model', [peer], function(err, model) {
         if (err) { return console.log('control.model error for:', peer); }
-
-        //console.log('Got model', model);
+        
         self.modelCache[peer.hash] = model;
     });
 };
@@ -179,7 +178,7 @@ MistCli.prototype.repl = function() {
     console.log("Try 'help()' to get started.");
     
     mist.request('methods', [], function(err, methods) {
-        if (err) { console.log('Mist API responded with an error.'); process.exit(0); return; }
+        if (err) { console.log('Mist API responded with an error.', methods); process.exit(0); return; }
         
         var mroot = {};
     
