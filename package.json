@@ -6,7 +6,8 @@
   "main": "src/mist-cli.js",
   "dependencies": {
     "bson-buffer": "1.0.2",
-    "mist-api": "0.0.18"
+    "mist-api": "0.0.18",
+    "ws": "2.3.1"
   },
   "license": "Apache-2.0",
   "repository": {
