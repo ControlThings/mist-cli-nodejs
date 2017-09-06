@@ -24,6 +24,7 @@ function MistCli() {
     var self = this;
     this.ids = {};
     this.modelCache = {};
+    this.nameCache = {};
     
     // Uid of current user
     this.identity = null;
@@ -68,6 +69,7 @@ MistCli.prototype.updateIdentities = function() {
             if (self.identity === null && data[i].privkey) {
                 self.identity = data[i].uid;
                 console.log('Acting as \033[1m'+ data[i].alias +'\033[0m');
+                self.replCtx.displayPrompt();
             }
         }
         
@@ -131,6 +133,11 @@ MistCli.prototype.model = function(peer) {
         if (err) { return console.log('control.model error for:', peer); }
         
         self.modelCache[peer.hash] = model;
+        mist.request('mist.control.read', [peer, 'mist.name'], function(err, name) {
+            if (err) { return console.log('mist.name error for:', peer); }
+            
+            self.nameCache[peer.hash] = name;
+        });
     });
 };
 
@@ -171,7 +178,9 @@ MistCli.prototype.repl = function() {
                             args.push(arguments[j]);
                         }
                     }
-                    return mist.request(i, args, function() { console.log(); cb.apply(this, arguments); repl.displayPrompt(); }); 
+                    
+                    var reqId = mist.request(i, args, function() { console.log(); cb.apply(this, arguments); repl.displayPrompt(); });
+                    console.log('reqId: '+ reqId);
                 };
             })(i);
             //Init help hints
@@ -251,7 +260,7 @@ MistCli.prototype.repl = function() {
                     none = false;
                     var peer = this.peers[i];
                     var alias = this.ids[peer.ruid.toString('hex')] ? this.ids[peer.ruid.toString('hex')].alias : 'n/a';
-                    console.log('\x1b[37m'+'  peers['+i+']:', this.modelCache[peer.hash].device, '('+ alias +') '+(peer.online ? '':'offline')+'\x1b[39m');
+                    console.log('\x1b[37m'+'  peers['+i+']:', this.nameCache[peer.hash], '('+ alias +') '+(peer.online ? '':'offline')+'\x1b[39m');
                 }
                 if (none) { console.log('  (no peers found)'); }
             }).bind(self);
@@ -267,9 +276,8 @@ MistCli.prototype.repl = function() {
 
                 if (!this.identity) { return console.log('No identity to use.'); }
                 
-                mroot.wish.identity.list(function(err, data) {
-                    console.log('identities', err, data);
-                });
+                mroot.wish.connections.list()
+                
             }).bind(self);
         }
 

@@ -13,7 +13,7 @@ help['mist.control.read'] = { short: 'Read current value from peers endpoint', 
 help['mist.control.write'] = { short: 'Write value to peers endpoint', args: 'Peer peer, String endpoint, value' };
 help['mist.control.invoke'] = { short: 'Invoke peers endpoint', args: 'Peer peer, String endpoint, value' };
 help['mist.control.follow'] = { short: 'Follow changes in peer', args: 'Peer peer' };
-help['mist.control.requestMapping'] = { short: 'Request to map remote endpoints togehter', args: 'Peer dst, Peer src, String srcEndpoint, Object srcOpts, String dstEndpoint, Object dstOpts' };
+help['mist.control.requestMapping'] = { short: 'Request to map remote endpoints together', args: 'Peer dst, Peer src, String srcEndpoint, Object srcOpts, String dstEndpoint, Object dstOpts' };
 
 help['mist.manage.claim'] = { short: 'Claim ownership of peer', args: 'Peer peer' };
 help['mist.manage.peers'] = { short: 'List peers seen from peer', args: 'Peer peer' };
