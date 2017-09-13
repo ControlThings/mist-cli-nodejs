@@ -26,6 +26,7 @@ help['mist.manage.acl.userRoles'] = { short: 'Enumerate user roles in peer', ar
 help['mist.manage.user.ensure'] = { short: 'Ensure peer knows user', args: 'Peer peer, Cert user' };
 
 help['wish.identity.list'] = { short: 'List identities', args: '' };
+help['wish.identity.friendRequest'] = { short: 'Send friend request', args: 'Buffer uid, Cert cert' };
 
 help['sandbox.list'] = { short: 'List sandboxes', args: 'Buffer sandboxId' };
 help['sandbox.remove'] = { short: 'Remove sandbox', args: 'Buffer sandboxId' };
@@ -38,12 +39,14 @@ help['sandboxed.logout'] = { short: 'Log out sandboxed app', args: 'Buffer sand
 help['sandboxed.settings'] = { short: 'Request settings to be shown by sandbox manager', args: 'Buffer sandboxId' };
 help['sandboxed.listPeers'] = { short: 'List peers in sandbox', args: 'Buffer sandboxId' };
 help['sandboxed.signals'] = { short: 'Subscribe to sandboxed signals for app', args: 'Buffer sandboxId' };
+help['sandboxed.methods'] = { short: 'Sandboxed methods', args: 'Buffer sandboxId' };
 help['sandboxed.mist.control.model'] = { short: 'Model of peer', args: 'Buffer sandboxId, Peer peer' };
 help['sandboxed.mist.control.read'] = { short: 'Read current value from peers endpoint', args: 'Buffer sandboxId, Peer peer, String endpoint' };
 help['sandboxed.mist.control.write'] = { short: 'Write value to peers endpoint', args: 'Buffer sandboxId, Peer peer, String endpoint, value' };
 help['sandboxed.mist.control.invoke'] = { short: 'Invoke peers endpoint', args: 'Buffer sandboxId, Peer peer, String endpoint, value' };
 help['sandboxed.mist.control.follow'] = { short: 'Follow changes in peer', args: 'Buffer sandboxId, Peer peer' };
 help['sandboxed.wish.identity.list'] = { short: 'List identities', args: 'Buffer sandboxId' };
+help['sandboxed.wish.identity.friendRequest'] = { short: 'Send friend request', args: 'Buffer sandboxId, Buffer uid, Cert cert' };
 
 
 module.exports = help;
