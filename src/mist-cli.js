@@ -20,6 +20,26 @@ var Directory = require('../deps/directory/directory.js').Directory;
 
 var mist = new Mist({ name: 'MistCli', corePort: parseInt(process.env.CORE) });
 
+mist.create({
+    mist: {
+        type: 'string',
+        '#': {
+            name: {
+                label: 'Name',
+                type: 'string',
+                read: true
+            }
+        }
+    },
+    // dummy needed due to bug in mist-api
+    ep: {
+        type: 'int',
+        read: true
+    }
+});
+
+mist.update('mist.name', 'MistCli');
+
 function MistCli() {
     var self = this;
     this.ids = {};
@@ -128,16 +148,26 @@ MistCli.prototype.updatePeersCb = function(err, peers) {
 
 MistCli.prototype.model = function(peer) {
     var self = this;
-    
-    mist.request('mist.control.model', [peer], function(err, model) {
-        if (err) { return console.log('control.model error for:', peer); }
-        
-        self.modelCache[peer.hash] = model;
-        mist.request('mist.control.read', [peer, 'mist.name'], function(err, name) {
-            if (err) { return console.log('mist.name error for:', peer); }
-            
-            self.nameCache[peer.hash] = name;
+
+    function readOldModel(peer) {
+        mist.request('mist.control.model', [peer], function(err, model) {
+            if (err) { return console.log('Trying to read old model: control.model error for:', peer); }
+
+            if (model.device) {
+                // old model
+                self.modelCache[peer.hash] = model.model;
+                self.nameCache[peer.hash] = model.device;
+                return;
+            }
+
+            self.modelCache[peer.hash] = model;
         });
+    }
+
+    mist.request('mist.control.read', [peer, 'mist.name'], function(err, name) {
+        if (err) { return readOldModel(peer); }
+
+        self.nameCache[peer.hash] = name;
     });
 };
 
