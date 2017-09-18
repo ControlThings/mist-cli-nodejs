@@ -12,35 +12,39 @@ var useColors = true;
 var maxInspectDepth = 10;
 var pkg = require("./../package.json");
 
-var Mist = require('mist-api').Mist;
 var crypto = require('crypto');
 
 var help = require('./help.js');
 var Directory = require('../deps/directory/directory.js').Directory;
 
-var mist = new Mist({ name: 'MistCli', corePort: parseInt(process.env.CORE) });
+function MistCli(mist) {
+    if (mist) {
+        this.mistApi = mist;
+    } else {
+        var Mist = require('mist-api').Mist;
+        this.mistApi = new Mist({ name: 'MistCli', corePort: parseInt(process.env.CORE) });
 
-mist.create({
-    mist: {
-        type: 'string',
-        '#': {
-            name: {
-                label: 'Name',
+        this.mistApi.create({
+            mist: {
                 type: 'string',
+                '#': {
+                    name: {
+                        label: 'Name',
+                        type: 'string',
+                        read: true
+                    }
+                }
+            },
+            // dummy needed due to bug in mist-api
+            ep: {
+                type: 'int',
                 read: true
             }
-        }
-    },
-    // dummy needed due to bug in mist-api
-    ep: {
-        type: 'int',
-        read: true
+        });
+
+        this.mistApi.update('mist.name', 'MistCli');
     }
-});
-
-mist.update('mist.name', 'MistCli');
-
-function MistCli() {
+    
     var self = this;
     this.ids = {};
     this.modelCache = {};
@@ -51,7 +55,7 @@ function MistCli() {
     
     this.repl();
 
-    mist.request('signals', [], function(err, data) {
+    this.mistApi.request('signals', [], function(err, data) {
         if (err) { return console.log('signals failed.', data); }
         
         var signal;
@@ -63,6 +67,8 @@ function MistCli() {
         } else {
             signal = data;
         }
+
+        //console.log('Signal:', signal, data);
         
         switch (signal) {
             case 'peers':
@@ -70,7 +76,6 @@ function MistCli() {
                 self.updatePeers();
                 break;
             default:
-                //console.log('Signal other than peers:', signal, payload ? payload : '');
                 break;
         }
     });
@@ -81,7 +86,7 @@ function MistCli() {
 MistCli.prototype.updateIdentities = function() {
     var self = this;
     
-    mist.wish('identity.list', [], function (err, data) {
+    this.mistApi.wish('identity.list', [], function (err, data) {
         self.ids = {};
         for(var i in data) {
             self.ids[data[i].uid.toString('hex')] = data[i];
@@ -98,7 +103,7 @@ MistCli.prototype.updateIdentities = function() {
 };
 
 MistCli.prototype.updatePeers = function() {
-    mist.request('listPeers', [], this.updatePeersCb.bind(this));
+    this.mistApi.request('listPeers', [], this.updatePeersCb.bind(this));
 };
 
 MistCli.prototype.updatePeersCb = function(err, peers) {
@@ -150,7 +155,7 @@ MistCli.prototype.model = function(peer) {
     var self = this;
 
     function readOldModel(peer) {
-        mist.request('mist.control.model', [peer], function(err, model) {
+        self.mistApi.request('mist.control.model', [peer], function(err, model) {
             if (err) { return console.log('Trying to read old model: control.model error for:', peer); }
 
             if (model.device) {
@@ -164,7 +169,7 @@ MistCli.prototype.model = function(peer) {
         });
     }
 
-    mist.request('mist.control.read', [peer, 'mist.name'], function(err, name) {
+    this.mistApi.request('mist.control.read', [peer, 'mist.name'], function(err, name) {
         if (err) { return readOldModel(peer); }
 
         self.nameCache[peer.hash] = name;
@@ -177,7 +182,7 @@ MistCli.prototype.repl = function() {
     console.log("\x1b[33mNot everything works as expected! You have been warned.\x1b[39m");
     console.log("Try 'help()' to get started.");
     
-    mist.request('methods', [], function(err, methods) {
+    this.mistApi.request('methods', [], function(err, methods) {
         if (err) { console.log('Mist API responded with an error.', methods); process.exit(0); return; }
         
         var mroot = {};
@@ -209,7 +214,7 @@ MistCli.prototype.repl = function() {
                         }
                     }
                     
-                    var reqId = mist.request(i, args, function() { console.log(); cb.apply(this, arguments); repl.displayPrompt(); });
+                    var reqId = self.mistApi.request(i, args, function() { console.log(); cb.apply(this, arguments); repl.displayPrompt(); });
                     console.log('reqId: '+ reqId);
                 };
             })(i);
@@ -239,7 +244,7 @@ MistCli.prototype.repl = function() {
         });
 
         repl.on("exit", function () {
-            mist.shutdown();
+            self.mistApi.shutdown();
             console.log("Bye!");
             process.exit(0);
         });
@@ -296,10 +301,10 @@ MistCli.prototype.repl = function() {
             }).bind(self);
             
             repl.context.cancel = function(id) {
-                mist.requestCancel(id);
+                self.mistApi.requestCancel(id);
             };
             
-            repl.context.directory = new Directory(repl, printResult, mist);
+            repl.context.directory = new Directory(repl, printResult, this.mistApi);
             
             repl.context.invite = (function(expert, peer) {
                 console.log('\033[1m'+this.ids[this.identity.toString('hex')].alias+'\033[0m'+ ' inviting \033[1m'+ expert.alias +'\033[0m to \033[1m'+ this.modelCache[peer.hash].device +'\033[0m');
