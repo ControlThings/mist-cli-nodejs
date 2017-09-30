@@ -24,7 +24,7 @@ function MistCli(mist) {
         var Mist = require('mist-api').Mist;
         this.mistApi = new Mist({ name: 'MistCli', corePort: parseInt(process.env.CORE) });
 
-        this.mistApi.create({
+        this.mistApi.node.create({
             mist: {
                 type: 'string',
                 '#': {
@@ -42,7 +42,7 @@ function MistCli(mist) {
             }
         });
 
-        this.mistApi.update('mist.name', 'MistCli');
+        this.mistApi.node.update('mist.name', 'MistCli');
     }
     
     var self = this;
@@ -86,7 +86,7 @@ function MistCli(mist) {
 MistCli.prototype.updateIdentities = function() {
     var self = this;
     
-    this.mistApi.wish('identity.list', [], function (err, data) {
+    this.mistApi.wish.request('identity.list', [], function (err, data) {
         self.ids = {};
         for(var i in data) {
             self.ids[data[i].uid.toString('hex')] = data[i];
