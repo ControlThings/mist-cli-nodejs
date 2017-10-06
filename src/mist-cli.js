@@ -42,7 +42,9 @@ function MistCli(mist) {
             }
         });
 
-        this.mistApi.node.update('mist.name', 'MistCli');
+        this.mistApi.node.read('mist.name', function(args, peer, cb) { cb('MistCli'); });
+
+        //this.mistApi.node.changed('mist.name');
     }
     
     var self = this;
