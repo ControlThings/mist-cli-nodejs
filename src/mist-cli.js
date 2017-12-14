@@ -230,7 +230,7 @@ MistCli.prototype.repl = function() {
                 enumerable: false,
                 configurable: false,
                 writable: false,
-                value: (function(args, doc) { return function() { return '\x1b[33m('+args+')\x1b[37m '+doc+'\x1b[39m'; } })(args, doc)
+                value: (function(args, doc) { return function() { return '\x1b[37m'+doc+' \x1b[33m('+args+')\x1b[39m'; } })(args, doc)
             });
         };
 
