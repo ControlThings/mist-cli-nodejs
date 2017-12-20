@@ -33,7 +33,7 @@ help['wish.relay.list'] = { short: 'List relays', args: '' };
 help['wish.relay.add'] = { short: 'Add relay', args: 'relay: String' };
 help['wish.relay.remove'] = { short: 'Remove relay', args: 'relay: String' };
 help['wish.connections.list'] = { short: 'List connections', args: '' };
-help['wish.connections.request'] = { short: 'Send request to remote core', args: 'op: String, args: Array' };
+help['wish.connections.request'] = { short: 'Send request to remote core', args: 'host: Host, op: String, args: Array' };
 
 help['sandbox.list'] = { short: 'List sandboxes', args: 'sandboxId: SandboxId' };
 help['sandbox.remove'] = { short: 'Remove sandbox', args: 'sandboxId: SandboxId' };
@@ -42,6 +42,7 @@ help['sandbox.addPeer'] = { short: 'Add peer to allowed list for sandbox', args
 help['sandbox.removePeer'] = { short: 'Remove peer from allowed list for sandbox', args: 'sandboxId: SandboxId, Peer peer' };
 help['sandbox.allowRequest'] = { short: 'Allow a sandboxed request received via signals', args: 'sandboxId: SandboxId, request: Request' };
 help['sandbox.denyRequest'] = { short: 'Deny a sandboxed request received via signals', args: 'sandboxId: SandboxId, request: Request' };
+help['sandbox.emit'] = { short: 'Emit signal to sandbox', args: 'sandboxId: SandboxId, hint: string, opts: Object' };
 
 help['sandboxed.login'] = { short: 'Login sandboxed app', args: 'sandboxId: SandboxId, String name' };
 help['sandboxed.logout'] = { short: 'Log out sandboxed app', args: 'sandboxId: SandboxId' };
@@ -59,8 +60,9 @@ help['sandboxed.mist.control.follow'] = { short: 'Follow changes in peer', args
 help['sandboxed.wish.signals'] = { short: 'Receive signals from Wish', args: 'sandboxId: SandboxId, core: null | Host' };
 help['sandboxed.wish.identity.create'] = { short: 'Create identity', args: 'sandboxId: SandboxId, core: null | Host, alias: String' };
 help['sandboxed.wish.identity.get'] = { short: 'Get identity details', args: 'sandboxId: SandboxId, core: null | Host, uid: Uid' };
-help['sandboxed.wish.identity.list'] = { short: 'List identities', args: 'sandboxId: SandboxId' };
+help['sandboxed.wish.identity.list'] = { short: 'List identities', args: 'sandboxId: SandboxId, core: null | Host' };
 help['sandboxed.wish.identity.update'] = { short: 'Update identity meta and alias', args: 'sandboxId: SandboxId, core: null | Host, uid: Uid, meta: Meta' };
+help['sandboxed.wish.identity.permissions'] = { short: 'Update identity permissions', args: 'sandboxId: SandboxId, core: null | Host, uid: Uid, permissions: Permisssions' };
 help['sandboxed.wish.identity.export'] = { short: 'Export identity', args: 'sandboxId: SandboxId, core: null | Host, uid: Uid' };
 help['sandboxed.wish.identity.sign'] = { short: 'Sign document', args: 'sandboxId: SandboxId, core: null | Host, uid: Uid, document: Document' };
 help['sandboxed.wish.identity.verify'] = { short: 'Verify document', args: 'sandboxId: SandboxId, core: null | Host, document: Document' };
