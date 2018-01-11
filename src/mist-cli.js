@@ -45,6 +45,7 @@ function MistCli(mist) {
         this.mistApi.node.read('mist.name', function(args, peer, cb) { cb(null, 'MistCli'); });
 
         //this.mistApi.node.offlineCb = function(peer) { console.log('offline:', peer); };
+        //this.mistApi.node.onlineCb = function(peer) { console.log('online:', peer); };
 
         //this.mistApi.node.changed('mist.name');
     }
