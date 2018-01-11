@@ -1,13 +1,13 @@
 {
   "name": "mist-cli",
-  "version": "0.0.5",
+  "version": "0.4.0",
   "author": "André Kaustell <andre.kaustell@controlthings.fi>",
   "description": "Mist Cli tool based on mist-api",
   "main": "src/mist-cli.js",
   "dependencies": {
     "bson-buffer": "1.0.2",
-    "mist-api": "0.0.18",
-    "wish-rpc": "0.6.4",
+    "mist-api": "https://mist.controlthings.fi/dist/mist-api-0.4.0-beta.tgz",
+    "wish-rpc": "0.6.5",
     "ws": "2.3.1"
   },
   "license": "Apache-2.0",

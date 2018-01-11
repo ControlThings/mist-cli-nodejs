@@ -17,7 +17,14 @@ var crypto = require('crypto');
 var help = require('./help.js');
 var Directory = require('../deps/directory/directory.js').Directory;
 
+var peerHash = function(peer) {
+    var buf = new Buffer(peer.luid.toString('hex') + peer.ruid.toString('hex') + peer.rhid.toString('hex') + peer.rsid.toString('hex'), 'hex');
+    return crypto.createHash('sha256').update(buf).digest('hex').substr(0, 16);
+};
+
 function MistCli(mist) {
+    var self = this;
+    
     if (mist) {
         this.mistApi = mist;
     } else {
@@ -39,20 +46,42 @@ function MistCli(mist) {
             ep: {
                 type: 'int',
                 read: true
+            },
+            debug: {
+                type: 'invoke',
+                invoke: function(args, peer, cb) {
+                    console.log('DEBUG:', args);
+                    cb(null, true);
+                }
             }
         });
 
         this.mistApi.node.read('mist.name', function(args, peer, cb) { cb(null, 'MistCli'); });
 
-        //this.mistApi.node.offlineCb = function(peer) { console.log('offline:', peer); };
-        //this.mistApi.node.onlineCb = function(peer) { console.log('online:', peer); };
+        /*
+        this.mistApi.node.offlineCb = function(peer) {
+            var name = self.nameCache[peerHash(peer)] || 'n/a';
 
-        //this.mistApi.node.changed('mist.name');
+            self.mistApi.request('wish.identity.get', [peer.ruid], function(err, data) {
+                console.log('\n\x1b[37m'+'offline:', name, '('+ data.alias +') '+'\x1b[39m');
+                self.replCtx.displayPrompt();
+            });                
+        };
+        
+        this.mistApi.node.onlineCb = function(peer) {
+            self.mistApi.request('mist.control.read', [peer, 'mist.name'], function(err, name) {
+                if (err) { return console.log('Failed reading peer name', name); }
+
+                self.mistApi.request('wish.identity.get', [peer.ruid], function(err, data) {
+                    console.log('\n\x1b[37m'+'online:', name, '('+ data.alias +') '+'\x1b[39m');
+                    self.replCtx.displayPrompt();
+                });
+            });
+        };
+        */
     }
     
-    var self = this;
     this.ids = {};
-    this.modelCache = {};
     this.nameCache = {};
     
     // Uid of current user
@@ -98,7 +127,7 @@ MistCli.prototype.updateIdentities = function() {
             
             if (self.identity === null && data[i].privkey) {
                 self.identity = data[i].uid;
-                console.log('Acting as \033[1m'+ data[i].alias +'\033[0m');
+                console.log('\nActing as \033[1m'+ data[i].alias +'\033[0m');
                 self.replCtx.displayPrompt();
             }
         }
@@ -141,44 +170,28 @@ MistCli.prototype.updatePeersCb = function(err, peers) {
     }
     
     for(var i in this.peers) {
-        var p = this.peers[i];
+        var peer = this.peers[i];
         // update hash
-        var buf = new Buffer(p.luid.toString('hex') + p.ruid.toString('hex') + p.rhid.toString('hex') + p.rsid.toString('hex'), 'hex');
-        this.peers[i].hash = crypto.createHash('sha256').update(buf).digest('hex').substr(0, 16);
+        this.peers[i].hash = peerHash(peers[i]);
         
-        if (!this.modelCache[this.peers[i].hash]) {
-            this.modelCache[this.peers[i].hash] = { device: 'n/a' };
-            this.model(this.peers[i]);
+        if (!this.nameCache[this.peers[i].hash]) {
+            this.nameCache[this.peers[i].hash] = '(n/a)';
+            
+            (function(peer) {
+                self.mistApi.request('mist.control.read', [peer, 'mist.name'], function(err, name) {
+                    if (err) {
+                        console.log('Failed reading mist.name');
+                        name = peer.hash;
+                    }
+
+                    self.nameCache[peer.hash] = name;
+                });
+            })(peer);
         }
     }
     
     //console.log("Updated peers", this.peers);
     this.replCtx.context.peers = this.peers;
-};
-
-MistCli.prototype.model = function(peer) {
-    var self = this;
-
-    function readOldModel(peer) {
-        self.mistApi.request('mist.control.model', [peer], function(err, model) {
-            if (err) { return console.log('Trying to read old model: control.model error for:', peer); }
-
-            if (model.device) {
-                // old model
-                self.modelCache[peer.hash] = model.model;
-                self.nameCache[peer.hash] = model.device;
-                return;
-            }
-
-            self.modelCache[peer.hash] = model;
-        });
-    }
-
-    this.mistApi.request('mist.control.read', [peer, 'mist.name'], function(err, name) {
-        if (err) { return readOldModel(peer); }
-
-        self.nameCache[peer.hash] = name;
-    });
 };
 
 MistCli.prototype.repl = function() {
@@ -297,10 +310,9 @@ MistCli.prototype.repl = function() {
                 console.log('Known peers:');
                 var none = true;
                 for(var i in this.peers) {
-                    none = false;
                     var peer = this.peers[i];
                     var alias = this.ids[peer.ruid.toString('hex')] ? this.ids[peer.ruid.toString('hex')].alias : 'n/a';
-                    console.log('\x1b[37m'+'  peers['+i+']:', this.nameCache[peer.hash], '('+ alias +') '+(peer.online ? '':'offline')+'\x1b[39m');
+                    if (peer.online) { none = false; console.log('\x1b[37m'+'  peers['+i+']:', this.nameCache[peer.hash], '('+ alias +') '+'\x1b[39m'); }
                 }
                 if (none) { console.log('  (no peers found)'); }
             }).bind(self);
