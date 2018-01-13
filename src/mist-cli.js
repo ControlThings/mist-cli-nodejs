@@ -269,7 +269,11 @@ MistCli.prototype.repl = function() {
 
         function printResult(err, data) {
             if(err) {
-                console.log("Error:", data);
+                if (data.end) {
+                    console.log("Request terminated:", data);
+                } else {
+                    console.log("Error:", data);
+                }
             } else {
                 console.log(inspect(data, maxInspectDepth, null, useColors));
             }
