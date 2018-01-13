@@ -2,7 +2,7 @@
 
 This is bleeding egde software and WILL BREAK from time to time, you have been warned.
 
-This package is dependent on the mist-api package, which currently is working with Linux x64, OSX x64 and Raspberry Pi, on nodejs v6.x only. To get it working you also need to run a Wish Core on the same host.
+This package is dependent on the mist-api package, which currently is working with Linux x64/ia32, OSX x64 and Raspberry Pi, on nodejs v6.x only. To get it working you also need to run a Wish Core on the same host.
 
 ## Prerequisites
 
@@ -13,9 +13,9 @@ This package is dependent on the mist-api package, which currently is working wi
 2) Download and run wish-core (https://mist.controlthings.fi/developer).
 
 ```sh
-wget https://mist.controlthings.fi/dist/wish-core-v0.6.8-x64-linux
-chmod +x ./wish-core-v0.6.8-x64-linux
-./wish-core-v0.6.8-x64-linux
+wget https://mist.controlthings.fi/dist/wish-core-v0.8.0-beta-2-x64-linux
+chmod +x ./wish-core-v0.8.0-beta-2-x64-linux
+./wish-core-v0.8.0-beta-2-x64-linux
 ```
 
 3) Get command line tool `wish-cli`
