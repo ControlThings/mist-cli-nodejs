@@ -6,7 +6,7 @@
   "main": "src/mist-cli.js",
   "dependencies": {
     "bson-buffer": "1.0.2",
-    "mist-api": "https://mist.controlthings.fi/dist/mist-api-0.4.0-beta.tgz",
+    "mist-api": "0.4.0-beta",
     "wish-rpc": "0.6.5",
     "ws": "2.3.1"
   },
