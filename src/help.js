@@ -17,7 +17,6 @@ help['mist.control.invoke'] = { short: 'Invoke peers endpoint', args: 'Peer pee
 help['mist.control.follow'] = { short: 'Follow changes in peer', args: 'Peer peer' };
 help['mist.control.requestMapping'] = { short: 'Request to map remote endpoints together', args: 'Peer dst, Peer src, String srcEndpoint, Object srcOpts, String dstEndpoint, Object dstOpts' };
 
-help['mist.manage.claim'] = { short: 'Claim ownership of peer', args: 'Peer peer' };
 help['mist.manage.peers'] = { short: 'List peers seen from peer', args: 'Peer peer' };
 help['mist.manage.acl.model'] = { short: 'Show access control model from peer', args: 'Peer peer' };
 help['mist.manage.acl.allow'] = { short: 'Allow role permission to endpoint in peer', args: 'Peer peer, role, endpoint, permission' };
