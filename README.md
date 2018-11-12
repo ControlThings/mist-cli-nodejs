@@ -8,12 +8,12 @@ This package is dependent on the mist-api package, which currently is working wi
 
 1) Download and install `node.js` v.6.x. (tested on v6.9.2)
 
-2) Download and run wish-core (https://mist.controlthings.fi/developer).
+2) Download and run wish-core (choose the desired target platform https://controlthings.fi/dev/).
 
 ```sh
-wget https://mist.controlthings.fi/dist/wish-core-v0.8.0-beta-2-x64-linux
-chmod +x ./wish-core-v0.8.0-beta-2-x64-linux
-./wish-core-v0.8.0-beta-2-x64-linux
+wget https://www.controlthings.fi/dist/wish-core-v0.8.0-beta-3-x64-linux
+chmod +x ./wish-core-v0.8.0-beta-3-x64-linux
+./wish-core-v0.8.0-beta-3-x64-linux
 ```
 
 3) Get command line tool `wish-cli`
