@@ -1,7 +1,5 @@
 # Mist Cli
 
-This is bleeding egde software and WILL BREAK from time to time, you have been warned.
-
 This package is dependent on the mist-api package, which currently is working with Linux x64/ia32, OSX x64 and Raspberry Pi, on nodejs v6.x only. To get it working you also need to run a Wish Core on the same host.
 
 ## Prerequisites
