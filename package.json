@@ -1,6 +1,6 @@
 {
   "name": "mist-cli",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "author": "André Kaustell <andre.kaustell@controlthings.fi>",
   "description": "Mist Cli tool based on mist-api",
   "main": "src/mist-cli.js",
